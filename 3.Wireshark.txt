@@ -1,0 +1,78 @@
+Wireshark capturing modes:
+``````````````````````````
+Promiscuous mode: 
+`````````````````
+Sets interface to capture all packets on a network 
+
+Monitor mode:
+`````````````
+Sets wireless interface to capture all the traffic it can receive [unix/linux only]
+
+
+Logical operator:
+``````````````````
+1. and or && : Logical AND [ all the condition should match ]
+2. or or ||  : Logical OR [Either all or one should match ]
+3. xor or ^^ : Logical XOR [ Exclusive alteration - only one of the two condition match not both]
+4. not or ! : Not [ Not equal to ]
+
+Filtering packets [display filter]:
+```````````````````````````````````
+eq or == : equal [ ip.dst == x.x.x.x ]
+ne or != : Not equal [ ip.dst != x.x.x.x ]
+gt or >  : Greater than [ frame.len > 10 ]
+it or <  : less than [ frame.len < 10 ]
+ge or >=  : Greater than or equal [ frame.len >= 10 ]
+le or <=  : Less than or equal [ frame.len <= 10 ]
+
+Common filtering commands:
+``````````````````````````
+Filter by IP:
+`````````````
+ip.addr == x.x.x.x
+
+filter by dst IP:
+`````````````````
+ip.dst == x.x.x.x
+
+Filter by source IP:
+````````````````````
+ip.src == x.x.x.x
+
+Filter by IP range:
+````````````````````
+ip.addr >= x.x.x.1 and ip.addr <= x.x.x.100
+
+Filter by multiple IPs:
+```````````````````````
+ip.addr == x.x.x.1 && ip.addr == x.x.x.100
+
+Filter by subnet:
+`````````````````
+ip.addr == 10.0.0.0/24
+
+Filter by port:
+````````````````
+tcp.port == 25
+
+Filter by dst port:
+`````````````````````
+tcp.dstport == 23
+
+Filter by IP addr and port:
+```````````````````````````
+ip.addr == x.x.x.x and tcp.port == 25
+
+Filter by URL:
+``````````````
+http.host == "hostname"
+
+Filter by SYN flag:
+```````````````````
+tcp.flags.syn == 1
+tcp.flags.syn == 1 and tcp.flags.ack == 0
+
+
+
+
+

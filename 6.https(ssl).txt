@@ -1,0 +1,54 @@
+With SSL/TLS:
+`````````````
+# mkdir /etc/nginx/certs
+# cd /etc/nginx/certs/
+
+Generate ROOT CA Certificate X.509 with OpenSSL:
+````````````````````````````````````````````````
+1) Generate private & public certificate
+`````````````````````````````````````````
+# openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
+
+NOTE: writing new private key to 'key.pem'
+
+2) To review the certificate
+````````````````````````````
+# openssl x509 -text -noout -in certificate.pem
+
+ Issuer: C = AU, ST = Some-State, O = Internet Widgits Pty Ltd
+        Validity
+            Not Before: Mar 14 16:28:14 2022 GMT
+            Not After : Mar 14 16:28:14 2023 GMT
+        Subject: C = AU, ST = Some-State, O = Internet Widgits Pty Ltd
+
+
+++++++++++++++++++
+
+
+4) Configure nginx for SSL:
+````````````````````````````
+# vim /etc/nginx/sites-available/test.conf
+
+server {
+        listen 443;
+	ssl on;
+	ssl_certificate /etc/nginx/certs/certificate.pem
+	ssl_certificate_key /etc/nginx/certs/key.pem
+
+        root /var/www/test.com/html;
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name test.com www.test.com;
+	access_log /var/log/nginx/test.com.access
+	error_log /var/log/nginx/test.com.errors
+        location / {
+                try_files $uri $uri/ =404;
+        }
+}
+
+:wq
+
+# nginx -t
+# systemctl restart nginx
+
+# curl -ks https://test.com

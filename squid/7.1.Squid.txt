@@ -1,0 +1,95 @@
+squid
+-------\
+Squid is caching and forwarding HTTP web proxy. Which is used to speed up a web server by caching repeated requests, caching web, DNS and filtering traffic.
+
+
+# yum install squid -y
+# apt install squid -y
+
+
+# systemctl restart squid
+# systemctl enable squid
+
+To check:
+``````````
+# squid -k check | echo $?
+
+
+Port : 3128
+
+# firewall-cmd --zone=public --add-service=squid --permanent
+# firewall-cmd --reload
+
+
+RULE:
+`````
+http_access: Allows HTTP clients (browsers) to access the HTTP port. This is the primary access control list.
+
+http_reply_access: Allows HTTP clients (browsers) to receive the reply to their request. This further restricts permissions given by http_access.
+
+
+
+
+
+
+
+
+
+
+# squid -v
+
+Squid web cach dir: /var/spool/squid
+
+# vim /etc/squid/squid.conf
+
+Test the syntax of squid.conf:
+# squid -k parse
+
+# ls /var/log/squid
+# ls /var/spool/squid
+
+# systemctl restart squid
+OR
+# systemctl reload squid
+OR
+We can reload squid configuration file without restarting service:
+
+# squid -k reconfigure
+
+
+
+
+
+
+
+
+
+
+PORT : 3128
+------\
+
+
+
+
+
+
++++Allow local network
+
+# vim /etc/squid/squid.conf
+
+acl internet_allow src 192.168.206.121/32
+http_access allow internet_allow
+
+OR
+
+acl internet_allow src 192.168.206.0/24
+http_access allow internet_allow
+
+
+
+
+++++ Block IP 
+
+acl banned1 src 172.18.90.100-109
+http_access deny banned1
+http_reply_access allow all 

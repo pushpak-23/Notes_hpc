@@ -1,0 +1,110 @@
+Enable Docker REST API on Docker Server:
+````````````````````````````````````````
+
+Docker Server Information required:
+````````
+Access Docker via			:  	Remote Agent NCPA
+IP Address				: 	The IP address or FQDN of the server you would like to monitor.
+NCPA Listener Port 			:	5693 [Default]
+NCPA Token 				:	mytoken [default]
+Docker Service File			:	/usr/lib/systemd/system/docker.service
+Docker Socket	 			:	/run/containerd/containerd.sock
+Docker API Base URL			: 	The full URL to your Docker API. Ex: "http:/v1.30/" or "http://x.x.x.x:2375/"
+
+
+5) To setup above Docker API URL config: Enable Docker API
+
+- open docker.service file
+	# vim /usr/lib/systemd/system/docker.service
+	edit the line:
+	ExecStart=/usr/bin/dockerd -H=fd:// -H=tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
+
+	:wq
+
+- Reload the docker daemon
+	# systemctl daemon-reload
+
+- Restart the container
+	# systemctl restart docker.service
+
+- Test if it is working by using this command:
+	# curl http://192.168.206.144:2375
+	# curl http://192.168.206.144:2375/images/json
+	# curl http://192.168.206.144:2375/containers/json
+
+
+
+DOCS: https://docs.docker.com/reference/api/engine/version/v1.47/
+_________________________________________________________________________________
+curl -s http://192.168.82.22:2375/
+curl -s http://192.168.82.22:2375/images/json
+[]
+
+docker pull httpd:latest
+docker images
+
+curl -s http://192.168.82.22:2375/images/json
+
+[{"Containers":-1,"Created":1721259074,"Id":"sha256:4ce47c750a5864da2614d03c1d7eee1d2449033f51d5902c3c9fe2aea876b9fc","Labels":null,"ParentId":"","RepoDigests":["httpd@sha256:72f6e24600718dddef131de7cb5b31496b05c5af41e9db8707df371859a350bb"],"RepoTags":["httpd:latest"],"SharedSize":-1,"Size":147462574}]
+
+
+$ curl -s http://192.168.82.22:2375/images/json | jq -r '.[].RepoTags[]'
+
+
+$ curl -s http://192.168.82.22:2375/containers/json | jq
+
+
+
+
+# docker inspect -f "{{json .NetworkSettings.IPAddress}}" container_name
+
+
+
+
+
+
+
+
+
+
+
+
+
+______________________________________________________________________________________________
+JQ [ JSON Parsing ]
+````````````````````
+JSON DATA
+
+obj		{}
+Array		[]
+key:value	"name":"value", 'name':'value', 'name':12123
+NULL		NULL
+
+
+{"name":"Dheeraj","love1":{"drink":"coffee","coding":"I hate coding","study":null},"love2":{"drink":"coffee","coding":"I hate coding","study":"linux"}
+
+
+# cat data.json | jq
+# cat data.json | jq '.name'
+# cat data.json | jq '.love'
+# cat data.json | jq '.love.drink'
+# cat data.json | jq -r '.love.drink'
+# cat data.json | jq -r '.love.drink,.name'
+# cat data.json | jq -r '.love.study'
+null
+# cat data.json | jq -r '.love1.study,.love2.study'
+null
+Linux
+# cat data.json | jq -r 'select(.love1.study != null).love1.study,.love2.study'
+Linux
+# curl -s http://192.168.82.22:2375/images/json | jq -r '.[].RepoTags[]'
+
+
+
+
+
+
+
+
+
+

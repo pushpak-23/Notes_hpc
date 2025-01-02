@@ -1,0 +1,119 @@
+Nagios Monitoring:
+------------------
+- System monitoring and alert system enables you to take preventive measures before any issue affects the system.
+- rid of periodic testing
+- reduce maintenance cost without sacrificing performance
+- timely notification to manage control or breakdown
+- detect any network or server problems 
+- determines the root cause of any issues
+- maintains the security and availability of the service 
+
+Nagios:
+------
+- it monitor DB servers [RDS]
+- active development [CI/CD]
+- many OS supported [EC2]
+- host reachability [EC2]
+- gives application level information (Apache, LDAP etc...) [ EC2 - apache2 ]
+- Storage [ s3 ]
+
+NOTE:
+
+- Its allows you to detect and repair problems and mitigate future issues before they affect end-user
+- it provide centralized view of your entire IT infra
+
+System Requirements
+--------------------
+
+Architecture:
+-------------
+1. Install nagios plugins
+2. plugins checks the status and get results
+3. plugins sends results to Nagios to process
+4. Notifies the admin about the status 
+
+NagiosXI core [Manual centos]:
+-----------------------
+1. yum install epel-release
+2. yum repolist
+3. yum install nagios httpd php -y
+4. htpasswd -c /etc/nagios/passwd nagiosadmin
+5. http://localhost/nagios
+
+	username: nagiosadmin
+	password: redhat
+
+-> Nagios stat on OS
+`````````````````````
+# nagiostats
+
+-> Reading configuration data
+```````````
+# nagios -v /etc/nagios/nagios.cfg
+___________________
+
+NagiosXI core [VM]: ****MOST PREFERABLE***
+-------------------
+1. signup & download (.ova)
+2. Access URL & setup
+3. Setup agent by usign RPM repo [ nagios.org/ncpa ]
+4. Run fork bomb to test stress
+5. also 'birdseye'
+6. also 'event log'
+___________________
+
+NCPA [Nagios Cross-Platform Agent]:
+-----------------------------------
+Monitoring agent for Windows, Linux, and Mac, Cloud, Docker etc...
+
+
+1) 
+CentOS / RHEL / Oracle Agent:
+```````````````````````````````
+- Install From Nagios RPM Repository  [ CentOS 7/ RHEL 7]
+# rpm -Uvh https://repo.nagios.com/nagios/7/nagios-repo-7-4.el7.noarch.rpm  [ ver: 7 ]
+# yum repolist
+# rpm --import https://repo.nagios.com/GPG-KEY-NAGIOS-V3
+# yum install ncpa -y
+
+- Install From Nagios RPM Repository  [ CentOS 9/ RHEL 9]
+# rpm -Uvh https://repo.nagios.com/nagios/7/nagios-repo-7-4.el7.noarch.rpm  [ ver: 7 ]
+# yum repolist
+# rpm --import https://repo.nagios.com/GPG-KEY-NAGIOS-V3
+# yum install ncpa -y
+
+
+
+
+Debian:
+```````
+# apt install apt-transport-https
+# Add to the apt sources list
+echo "deb https://repo.nagios.com/deb/$(lsb_release -cs) /" > /etc/apt/sources.list.d/nagios.list
+
+# Add our public GPG key
+wget -qO - https://repo.nagios.com/GPG-KEY-NAGIOS-V3 | apt-key add -
+
+# Update your repositories
+apt-get update
+# apt install apt-transport-https [ may be not needed ]
+# apt install ncpa -y
+
+2) 
+Configuring NCPA
+````````````````
++ The NCPA configuration file is located here:
+
+# vim /usr/local/ncpa/etc/ncpa.cfg
+
+community_string = mytoken
+
+Change it to your required token, for example:
+
+community_string = Str0ngT0k3n
+
++ You will now need to restart the "ncpa_listener" service for these changes to take affect
+
+# systemctl restart ncpa_listener.service
+OR
+# /etc/init.d/ncpa restart

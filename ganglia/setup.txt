@@ -1,0 +1,263 @@
+GANGLIA MONITORING SYSTEM
+``````````````````````````
+						|-----[ node1 (Gmond_Daemon) ]-ubuntu
+						|
+						|
+[ USER ]----[ Ganglia Server (Gmetad)]----------|-----[ node2 (Gmond_Daemon) ]-centos
+						|
+						|
+						|-----[ node3 (Gmond_Daemon) ]-ubuntu
+
+
+
+
+Ganglia Server [ CentOS-7 ]
+```````````````````````````
+1) Setup Repo
+``````````````
+# cd /etc/yum.repos.d/
+# mkdir old
+# mv * old/
+
+# vim centos.repo
+[base]
+name=CentOS-$releasever - Base
+baseurl=https://vault.centos.org/7.9.2009/os/$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+enabled=1
+
+[updates]
+name=CentOS-$releasever - Updates
+baseurl=https://vault.centos.org/7.9.2009/updates/$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+enabled=1
+
+[extras]
+name=CentOS-$releasever - Extras
+baseurl=https://vault.centos.org/7.9.2009/extras/$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+enabled=1
+
+[centosplus]
+name=CentOS-$releasever - CentOSPlus
+baseurl=https://vault.centos.org/7.9.2009/centosplus/$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+enabled=0
+
+
+# yum clean all
+# yum repolist
+
+2) Install ganglia:
+````````````````````
+# yum install epel-release -y
+# yum install -y php php-mysql php-gd php-ldap php-odbc php-pear php-xml php-xmlrpc php-mbstring php-snmp php-soap curl url-devel
+# yum install -y rrdtool rrdtool-devel ganglia-web ganglia-gmetad  ganglia-gmond ganglia-gmond-python httpd httpd-tools apr-devel zlib-devel  libconfuse-devel expat-devel pcre-devel
+
+
+3) firewalld & SELinux Disable:
+````````````````````````````````
+# systemctl stop firewalld
+# setenforce 0
+
+4) Config:
+``````````
+# cd /etc/ganglia/
+# ls 
+# vim gmetad.conf
+
+data_source "my cluster" localhost
+
+Change to >>>>
+
+data_source "master_cluster" 192.168.206.129
+
+:wq
+
+
+# vim gmond.conf
+
+
+cluster {
+	name = "master_cluster"
+	owner = "unspecified"
+	latlong = "unspecified"
+	url = "unspecified"
+}
+
+udp_send_channel {
+
+	# mcast_join = 239.2.11.71  <<<----- Comment it
+	host = 192.168.206.129 # <<<<--------- Add this line
+	port 8649
+	ttl = 1
+}
+
+udb_recv_channel {
+	# mcast_join = 239.2.11.71  <<<----- Comment it
+	port = 8649
+	# bind = 239.2.11.71  <<<----- Comment it
+	# retry_bind = true <<<------ Comment it
+	# buffer = 10485760  <<<------ Comment it
+}
+
+tcp_accept_channel {
+	port = 8649
+	# if you want to gzip XML output
+	# gzip_output = no   <<<------ Comment it
+}
+
+:wq
+
+
+5) Apache:
+``````````
+# cd /etc/httpd/conf.d/
+# ls
+ganglia.conf
+
+Alias /ganglia /usr/share/ganglia
+
+<Location /ganglia>
+	Required all granted
+</Location>
+
+:wq
+
+6) Restart/Start All Services
+``````````````````````````````
+
+# systemctl restart httpd gmond gmetad
+# systemctl enable httpd gmond gmetad
+# systemctl status httpd gmond gmetad
+
+7) Open WebUI
+``````````````
+http://192.168.206.129/ganglia
+________________________________________________
+
+
+
+
+Ganglia Node [ CentOS-7 ]:
+```````````````````````````
+1) Stop/Disable Firewalld & SELinux
+````````````````````````````````````
+# systemctl stop firewalld
+# setenforce 0
+
+2) Install Client Side Package:
+`````````````````````````````````
+# yum install ganglia-gmond -y
+
+3) Config:
+```````````
+# cd /etc/ganglia/
+# vim gmond.conf
+
+
+cluster {
+	name = "master_cluster"
+	owner = "unspecified"
+	latlong = "unspecified"
+	url = "unspecified"
+}
+
+udp_send_channel {
+
+	# mcast_join = 239.2.11.71  <<<----- Comment it
+	host = 192.168.206.129 # <<<<--------- Add this line
+	port 8649	 <<<----- Uncomment it
+	ttl = 1		 <<<----- Uncomment it
+}
+
+udb_recv_channel {
+	# mcast_join = 239.2.11.71  <<<----- Comment it
+	# port = 8649		<<<----- Comment it
+	# bind = 239.2.11.71  <<<----- Comment it
+	# retry_bind = true <<<------ Comment it
+	# buffer = 10485760  <<<------ Comment it
+}
+
+tcp_accept_channel {
+	# port = 8649	<<<----- Comment it
+	# if you want to gzip XML output
+	# gzip_output = no   <<<------ Comment it
+}
+
+:wq
+
+4) Restart/Start Service:
+`````````````````````````
+# systemctl restart gmond
+# systemctl enable gmond
+# systemctl status gmond
+
+5) Access WebUI:
+``````````````````
+Reload http://192.168.206.129/ganglia
+_______________________________________
+
+
+Ganglia Node [ Ubuntu ]:
+```````````````````````````
+1) Stop/Disable UFW
+````````````````````````````````````
+# ufw disable
+
+2) Install Client Side Package:
+`````````````````````````````````
+# apt install ganglia-monitor -y
+
+3) Config:
+```````````
+# cd /etc/ganglia/
+# vim gmond.conf
+
+
+cluster {
+	name = "master_cluster"
+	owner = "unspecified"
+	latlong = "unspecified"
+	url = "unspecified"
+}
+
+udp_send_channel {
+
+	# mcast_join = 239.2.11.71  <<<----- Comment it
+	host = 192.168.206.129 # <<<<--------- Add this line
+	port 8649	 <<<----- Uncomment it
+	ttl = 1		 <<<----- Uncomment it
+}
+
+udb_recv_channel {
+	# mcast_join = 239.2.11.71  <<<----- Comment it
+	# port = 8649		<<<----- Comment it
+	# bind = 239.2.11.71  <<<----- Comment it
+	# retry_bind = true <<<------ Comment it
+	# buffer = 10485760  <<<------ Comment it
+}
+
+tcp_accept_channel {
+	# port = 8649	<<<----- Comment it
+	# if you want to gzip XML output
+	# gzip_output = no   <<<------ Comment it
+}
+
+:wq
+
+4) Restart/Start Service:
+`````````````````````````
+# systemctl restart gmond
+# systemctl enable gmond
+# systemctl status gmond
+
+5) Access WebUI:
+``````````````````
+Reload http://192.168.206.129/ganglia
+
+

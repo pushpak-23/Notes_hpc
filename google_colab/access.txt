@@ -1,0 +1,17 @@
+Website: https://colab.research.google.com/
+
+!pip install linus-colab-ssh
+from colab_ssh import setup_ssh, loop_forever
+
+public_key = ''
+setup_ssh(public_key)
+loop_forever()
+
+
+
+
+
+
+ssh-copy-id -i ~/.ssh/id_rsa localhost
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+dpkg -i cloudflared-linux-amd64.deb
